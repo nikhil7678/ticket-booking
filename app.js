@@ -28,6 +28,41 @@ function showToast(message) {
 
 window.showToast = showToast;
 
+const matchSelect = document.querySelector("#match");
+const standSelect = document.querySelector("#stand");
+const quantityInput = document.querySelector("#quantity");
+const summaryMatch = document.querySelector("#summary-match");
+const summaryStand = document.querySelector("#summary-stand");
+const summaryPrice = document.querySelector("#summary-price");
+const summaryQuantity = document.querySelector("#summary-quantity");
+const summaryTotal = document.querySelector("#summary-total");
+
+const ticketPrices = {
+    "match-01": { general: 1500, premium: 3500, vip: 7500 },
+    "match-02": { general: 1200, premium: 3000, vip: 6500 },
+    "match-03": { general: 1000, premium: 2500, vip: 5500 }
+};
+
+function updateBookingSummary() {
+    const matchId = matchSelect.value;
+    const stand = standSelect.value;
+    const quantity = Number(quantityInput.value);
+    const matchLabel = matchSelect.selectedOptions[0].textContent.trim();
+    const price = ticketPrices[matchId] ? ticketPrices[matchId][stand] : 0;
+    const total = price * quantity;
+
+    summaryMatch.textContent = matchId ? matchLabel : "Not selected";
+    summaryStand.textContent = standSelect.selectedOptions[0].textContent;
+    summaryPrice.textContent = price.toLocaleString("en-IN");
+    summaryQuantity.textContent = String(quantity);
+    summaryTotal.textContent = total.toLocaleString("en-IN");
+    showToast("Booking summary updated.");
+}
+
+[matchSelect, standSelect, quantityInput].forEach((control) => {
+    control.addEventListener("change", updateBookingSummary);
+});
+
 document.querySelector("#match-list").addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) {
         return;
@@ -38,7 +73,6 @@ document.querySelector("#match-list").addEventListener("click", (event) => {
         return;
     }
 
-    const matchSelect = document.querySelector("#match");
     const matchId = bookButton.dataset.match;
     const matchOption = matchSelect.querySelector(`option[value="${matchId}"]`);
 
@@ -47,9 +81,10 @@ document.querySelector("#match-list").addEventListener("click", (event) => {
     }
 
     matchSelect.value = matchId;
+    matchSelect.dispatchEvent(new Event("change", { bubbles: true }));
     document.querySelector("#booking-form").scrollIntoView({
         behavior: "smooth",
         block: "start"
     });
-    showToast(`${matchOption.textContent.trim()} selected. Complete your booking below.`);
+    showToast(`${matchOption.textContent.trim()} selected. Booking summary updated.`);
 });
