@@ -28,6 +28,74 @@ function showToast(message) {
 
 window.showToast = showToast;
 
+const menuToggle = document.querySelector(".menu-toggle");
+const siteNavigation = document.querySelector("#site-navigation");
+
+function closeNavigation() {
+    menuToggle.setAttribute("aria-expanded", "false");
+    siteNavigation.classList.remove("is-open");
+}
+
+menuToggle.addEventListener("click", () => {
+    const isExpanded = menuToggle.getAttribute("aria-expanded") === "true";
+    menuToggle.setAttribute("aria-expanded", String(!isExpanded));
+    siteNavigation.classList.toggle("is-open", !isExpanded);
+});
+
+siteNavigation.addEventListener("click", (event) => {
+    if (event.target instanceof Element && event.target.closest("a")) {
+        closeNavigation();
+    }
+});
+
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+        closeNavigation();
+    }
+});
+
+window.addEventListener("resize", () => {
+    if (window.innerWidth > 768) {
+        closeNavigation();
+    }
+});
+
+const teamFilter = document.querySelector("#team-filter");
+const matchList = document.querySelector("#match-list");
+const matchCards = [...document.querySelectorAll(".match-card")];
+const matchResults = document.querySelector("#match-results");
+const viewButtons = [...document.querySelectorAll(".view-button")];
+
+function filterMatches() {
+    const selectedTeam = teamFilter.value;
+    let visibleMatches = 0;
+
+    matchCards.forEach((card) => {
+        const teams = card.dataset.teams.split(" ");
+        card.hidden = selectedTeam !== "all" && !teams.includes(selectedTeam);
+        if (!card.hidden) {
+            visibleMatches += 1;
+        }
+    });
+
+    matchResults.textContent = `Showing ${visibleMatches} of ${matchCards.length} matches`;
+}
+
+teamFilter.addEventListener("change", filterMatches);
+filterMatches();
+
+viewButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        const isListView = button.dataset.view === "list";
+        matchList.classList.toggle("is-list", isListView);
+        viewButtons.forEach((viewButton) => {
+            const isActive = viewButton === button;
+            viewButton.classList.toggle("is-active", isActive);
+            viewButton.setAttribute("aria-pressed", String(isActive));
+        });
+    });
+});
+
 const matchSelect = document.querySelector("#match");
 const standSelect = document.querySelector("#stand");
 const quantityInput = document.querySelector("#quantity");
